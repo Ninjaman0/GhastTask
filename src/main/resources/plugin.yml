@@ -1,0 +1,30 @@
+name: GhastTasks
+version: 1.0.0
+main: com.ninja.ghasttasks.GhastTasks
+api-version: 1.21
+author: Ninja0_0 aka NotNinja0_0
+description: A plugin for scheduling and executing commands at specific times
+website: https://github.com/Ninjaman0?tab=repositories
+depend: [PlaceholderAPI]
+
+commands:
+  ghasttasks:
+    description: Main command for GhastTasks
+    usage: /<command> <reload|list|edit|test|remove>
+    aliases: [gtasks]
+    permission: ghasttasks.use
+
+permissions:
+  ghasttasks.use:
+    description: Base permission for using GhastTasks commands
+    default: op
+  ghasttasks.admin:
+    description: Administrative permissions for GhastTasks
+    default: op
+    children:
+      - ghasttasks.use
+  ghasttasks.view:
+    description: Permission to view tasks
+    default: op
+    children:
+      - ghasttasks.use

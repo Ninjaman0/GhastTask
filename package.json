@@ -1,0 +1,11 @@
+{
+  "name": "ghasttasks-plugin",
+  "version": "1.0.0",
+  "description": "GhastTasks Minecraft Paper Plugin - Scheduled command execution",
+  "private": true,
+  "scripts": {
+    "build": "mvn clean package",
+    "clean": "mvn clean",
+    "test": "mvn test"
+  }
+}

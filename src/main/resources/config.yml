@@ -1,0 +1,42 @@
+# GhastTasks Configuration
+# Define tasks to be executed at specific times using server time from PlaceholderAPI
+
+# Task format:
+# tasks:
+#   <task_id>:
+#     time: "HH:MM"  # Time in 24-hour format
+#     commands:
+#       - "[console] command"  # Run as console (default)
+#       - "[op] command"       # Run as operator
+#       - "[player] command"   # Run as player
+#       - "command"            # Run as console (default)
+
+tasks:
+  1:
+    time: "12:00"
+    commands:
+      - "[console] broadcast §6Daily reward time!"
+      - "give @a diamond 1"
+      - "[console] say §aEveryone has received a diamond!"
+  
+  2:
+    time: "18:00"
+    commands:
+      - "[console] broadcast §cServer restart in 5 minutes!"
+      - "[console] title @a times 20 60 20"
+      - "[console] title @a title {\"text\":\"Server Restart\",\"color\":\"red\"}"
+      - "[console] title @a subtitle {\"text\":\"5 minutes remaining\",\"color\":\"yellow\"}"
+  
+  3:
+    time: "00:00"
+    commands:
+      - "[console] broadcast §9New day has begun!"
+      - "[console] weather clear"
+      - "[console] time set day"
+
+# Database settings (SQLite)
+database:
+  file: "tasks.db"
+
+# Debug mode - set to true for detailed logging
+debug: false
