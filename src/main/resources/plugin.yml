@@ -3,17 +3,17 @@ version: 1.0.0
 main: com.ninja.ghasttasks.GhastTasks
 api-version: 1.21
 author: Ninja0_0 aka NotNinja0_0
-description: A plugin for scheduling and executing commands at specific times
-website: https://github.com/Ninjaman0?tab=repositories
-depend: [PlaceholderAPI]
+description: A plugin for scheduling and executing commands at specific times with PlaceholderAPI integration
+website: https://github.com/Ninjaman0/GhastTask
+softdepend: [PlaceholderAPI]
+
 
 commands:
   ghasttasks:
     description: Main command for GhastTasks
-    usage: /<command> <reload|list|edit|test|remove>
+    usage: /<command> <reload|list|edit|test|remove|testtime|placeholders|help>
     aliases: [gtasks]
     permission: ghasttasks.use
-
 permissions:
   ghasttasks.use:
     description: Base permission for using GhastTasks commands
@@ -24,7 +24,7 @@ permissions:
     children:
       - ghasttasks.use
   ghasttasks.view:
-    description: Permission to view tasks
+    description: Permission to view tasks and placeholders
     default: op
     children:
       - ghasttasks.use

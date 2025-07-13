@@ -1,53 +1,69 @@
-# GhastTasks - Minecraft Plugin
+# GhastTasks
 
-A comprehensive Minecraft Paper plugin for scheduling and executing commands at specific times using PlaceholderAPI's server time. Built with robust error handling, spam prevention, and thread-safe operations.
+A powerful and flexible Minecraft plugin for scheduling and executing commands at specific times with PlaceholderAPI integration for countdown displays.
 
-## Features
+## 🌟 Features
 
-- **Scheduled Command Execution**: Execute commands at specific times daily using server time from PlaceholderAPI
-- **Multiple Execution Types**: Support for console, operator, and player command execution
-- **SQLite Database**: Tracks task execution to ensure each task runs exactly once per day
-- **In-Game Management**: Full command suite for managing tasks without server restart
-- **Configuration-Based**: Easy task configuration via YAML files
-- **Spam Prevention**: Built-in safeguards to prevent command spam and duplicate executions
-- **Thread-Safe Operations**: Robust concurrency handling for server stability
-- **Comprehensive Error Handling**: Detailed error handling and logging for troubleshooting
+### ⏰ **Scheduled Task Execution**
+- Execute commands at specific times using 24-hour format (HH:MM)
+- Support for multiple commands per task
+- Different execution contexts: Console, OP, and Player commands
+- Automatic daily execution tracking to prevent duplicate runs
 
-## Requirements
+### 🎯 **Command Execution Types**
+- `[console]` - Execute as console (default)
+- `[op]` - Execute with operator privileges
+- `[player]` - Execute as the first online player
 
-- **Minecraft Paper 1.21.4** or higher
-- **PlaceholderAPI** (required dependency)
-- **Java 21** or higher
+### 📊 **PlaceholderAPI Integration**
+- Real-time countdown displays for next scheduled tasks
+- Custom task messages with countdown integration
+- Multiple countdown formats (seconds, minutes, hours, formatted)
+- Individual task placeholders for specific tasks
 
-## Installation
+### 🛠️ **Management Commands**
+- In-game task management (add, remove, edit commands and times)
+- Live configuration reloading
+- Task testing without affecting schedules
+- Comprehensive help system with tab completion
 
-1. Download the GhastTasks plugin JAR file
-2. Place it in your server's `plugins` folder
-3. Ensure PlaceholderAPI is installed and running
-4. Start/restart your server
-5. Configure tasks in `plugins/GhastTasks/config.yml`
+### 💾 **Database Integration**
+- SQLite database for execution tracking
+- Prevents duplicate task execution on the same day
+- Automatic database optimization and maintenance
+- Thread-safe async operations
 
-## Configuration
+### 🔧 **Advanced Configuration**
+- YAML-based configuration with validation
+- Debug mode for detailed logging
+- Custom task messages for placeholder integration
+- Hot-reloading without server restart
 
-### Task Configuration Format
+## 📋 Requirements
+
+- **Minecraft Server**: 1.21+ (Bukkit/Paper/Spigot)
+- **Java**: 17 or higher
+- **Dependencies**: PlaceholderAPI (required)
+
+## 🚀 Installation
+
+1. **Download** the latest release from the releases page
+2. **Place** the JAR file in your server's `plugins` folder
+3. **Install** [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/) if not already installed
+4. **Restart** your server
+5. **Configure** tasks in `plugins/GhastTasks/config.yml`
+6. **Reload** the plugin with `/ghasttasks reload`
+
+## ⚙️ Configuration
+
+### Basic Task Configuration
 
 ```yaml
-tasks:
-  <task_id>:
-    time: "HH:MM"  # 24-hour format
-    commands:
-      - "[console] command"  # Run as console (default)
-      - "[op] command"       # Run as operator
-      - "[player] command"   # Run as player
-      - "command"            # Run as console (default)
-```
-
-### Example Configuration
-
-```yaml
+# GhastTasks Configuration
 tasks:
   1:
-    time: "12:00"
+    time: "12:00"                    # 24-hour format (HH:MM)
+    task-msg: "Daily Reward is in"   # Custom message for placeholders
     commands:
       - "[console] broadcast §6Daily reward time!"
       - "give @a diamond 1"
@@ -55,298 +71,165 @@ tasks:
   
   2:
     time: "18:00"
+    task-msg: "Server Restart is in"
     commands:
       - "[console] broadcast §cServer restart in 5 minutes!"
       - "[console] title @a times 20 60 20"
       - "[console] title @a title {\"text\":\"Server Restart\",\"color\":\"red\"}"
-      - "[console] title @a subtitle {\"text\":\"5 minutes remaining\",\"color\":\"yellow\"}"
-
+  
   3:
     time: "00:00"
+    task-msg: "New Day Event is in"
     commands:
       - "[console] broadcast §9New day has begun!"
       - "[console] weather clear"
       - "[console] time set day"
 
-# Database settings (SQLite)
+# Database settings
 database:
   file: "tasks.db"
 
-# Debug mode - set to true for detailed logging
+# Debug mode for detailed logging
 debug: false
 ```
 
-## Commands
+### Command Execution Types
 
-All commands use the base `/ghasttasks` (alias: `/gtasks`)
+| Prefix      | Description                    | Example                              |
+|-------------|--------------------------------|--------------------------------------|
+| `[console]` | Execute as console (default)   | `[console] give @a diamond 1`        |
+| `[op]`      | Execute with OP privileges     | `[op] gamemode creative @a`          |
+| `[player]`  | Execute as first online player | `[player] msg @a Hello from player!` |
+| *(none)*    | Execute as console (default)   | `broadcast Hello World!`             |
 
-### Command List
+## 🎮 Commands
 
-| Command | Permission | Description |
-|---------|------------|-------------|
-| `/ghasttasks help` | `ghasttasks.use` | Show command help |
-| `/ghasttasks reload` | `ghasttasks.admin` | Reload configuration |
-| `/ghasttasks list` | `ghasttasks.view` | List all configured tasks |
-| `/ghasttasks edit <id> time <HH:MM>` | `ghasttasks.admin` | Change task execution time |
-| `/ghasttasks edit <id> commands add <command>` | `ghasttasks.admin` | Add command to task |
-| `/ghasttasks edit <id> commands remove <index>` | `ghasttasks.admin` | Remove command from task |
-| `/ghasttasks test <id>` | `ghasttasks.admin` | Execute task immediately for testing |
-| `/ghasttasks remove <id>` | `ghasttasks.admin` | Delete task completely |
+### Main Command: `/ghasttasks` (Aliases: `/gtasks`)
 
-### Command Examples
+| Command                    | Permission         | Description                   |
+|----------------------------|--------------------|-------------------------------|
+| `/ghasttasks help`         | `ghasttasks.use`   | Show command help             |
+| `/ghasttasks list`         | `ghasttasks.view`  | List all configured tasks     |
+| `/ghasttasks reload`       | `ghasttasks.admin` | Reload configuration          |
+| `/ghasttasks test <id>`    | `ghasttasks.admin` | Test task execution           |
+| `/ghasttasks remove <id>`  | `ghasttasks.admin` | Remove a task                 |
+| `/ghasttasks testtime`     | `ghasttasks.admin` | Test system time and database |
+| `/ghasttasks placeholders` | `ghasttasks.view`  | Show available placeholders   |
 
-```bash
-# Show help
-/gtasks help
+### Task Editing Commands
 
-# Reload configuration
-/gtasks reload
+| Command                                         | Description                | Example                                                |
+|-------------------------------------------------|----------------------------|--------------------------------------------------------|
+| `/ghasttasks edit <id> time <HH:MM>`            | Change task execution time | `/ghasttasks edit 1 time 14:30`                        |
+| `/ghasttasks edit <id> commands add <command>`  | Add command to task        | `/ghasttasks edit 1 commands add give @a gold_ingot 5` |
+| `/ghasttasks edit <id> commands remove <index>` | Remove command by index    | `/ghasttasks edit 1 commands remove 2`                 |
+| `/ghasttasks edit <id> message <text>`          | Set custom task message    | `/ghasttasks edit 1 message Daily Event is in`         |
+| `/ghasttasks edit <id> message`                 | Clear task message         | `/ghasttasks edit 1 message`                           |
 
-# List all tasks
-/gtasks list
+## 🔑 Permissions
 
-# Change task 1's time to 14:30
-/gtasks edit 1 time 14:30
+| Permission         | Default | Description                                     |
+|--------------------|---------|-------------------------------------------------|
+| `ghasttasks.use`   | OP      | Base permission for using commands              |
+| `ghasttasks.view`  | OP      | Permission to view tasks and placeholders       |
+| `ghasttasks.admin` | OP      | Administrative permissions (edit, reload, test) |
 
-# Add a command to task 1
-/gtasks edit 1 commands add [console] say Hello World!
+## 📊 PlaceholderAPI Integration
 
-# Remove the 2nd command from task 1
-/gtasks edit 1 commands remove 2
+### Basic Information Placeholders
 
-# Test task 1 immediately
-/gtasks test 1
+| Placeholder                       | Description                      | Example Output |
+|-----------------------------------|----------------------------------|----------------|
+| `%ghasttasks_next_task_id%`       | ID of next scheduled task        | `1`            |
+| `%ghasttasks_next_task_time%`     | Time of next scheduled task      | `12:00`        |
+| `%ghasttasks_tasks_total%`        | Total number of configured tasks | `3`            |
+| `%ghasttasks_next_task_commands%` | Number of commands in next task  | `5`            |
 
-# Remove task 1 completely
-/gtasks remove 1
-```
+### Countdown Placeholders
 
-## Permissions
+| Placeholder                      | Description                   | Example Output |
+|----------------------------------|-------------------------------|----------------|
+| `%ghasttasks_countdown_seconds%` | Total seconds until next task | `7825`         |
+| `%ghasttasks_countdown_minutes%` | Total minutes until next task | `130`          |
+| `%ghasttasks_countdown_hours%`   | Total hours until next task   | `2`            |
 
-| Permission | Default | Description |
-|------------|---------|-------------|
-| `ghasttasks.use` | op | Base permission for using commands |
-| `ghasttasks.admin` | op | Administrative permissions (edit, test, remove, reload) |
-| `ghasttasks.view` | op | Permission to view tasks (list command) |
+### Formatted Countdown Placeholders
 
-## Command Execution Types
+| Placeholder                        | Description           | Example Output     |
+|------------------------------------|-----------------------|--------------------|
+| `%ghasttasks_countdown_formatted%` | HH:MM:SS format       | `02:10:25`         |
+| `%ghasttasks_countdown_simple%`    | Human readable format | `2h 10m`           |
+| `%ghasttasks_countdown_detailed%`  | With task information | `Task 1 in 2h 10m` |
 
-### Console Commands (`[console]` or no prefix)
+### Individual Time Components
+
+| Placeholder                            | Description                   | Example Output |
+|----------------------------------------|-------------------------------|----------------|
+| `%ghasttasks_time_until_seconds_only%` | Only seconds component (0-59) | `25`           |
+| `%ghasttasks_time_until_minutes_only%` | Only minutes component (0-59) | `10`           |
+| `%ghasttasks_time_until_hours_only%`   | Only hours component (0-23)   | `2`            |
+
+### Custom Task Message Placeholders
+
+| Placeholder                        | Description                       | Example Output                |
+|------------------------------------|-----------------------------------|-------------------------------|
+| `%ghasttasks_next_taskmsg%`        | Next task message with countdown  | `Daily Reward is in 02:10:25` |
+| `%ghasttasks_task_<id>_msg%`       | Specific task message only        | `Daily Reward is in`          |
+| `%ghasttasks_task_<id>_countdown%` | Specific task message + countdown | `Daily Reward is in 02:10:25` |
+
+### Usage Examples
+
 ```yaml
-- "[console] broadcast Hello World!"
-- "give @a diamond"  # Also executes as console
+# In your scoreboard, chat, or other plugins:
+- "Next Event: %ghasttasks_next_taskmsg%"
+- "Time Remaining: %ghasttasks_countdown_formatted%"
+- "Daily Reward: %ghasttasks_task_1_countdown%"
+- "Events Today: %ghasttasks_tasks_total%"
 ```
 
-### Operator Commands (`[op]`)
-```yaml
-- "[op] tp player 0 100 0"
-```
-
-### Player Commands (`[player]`)
-```yaml
-- "[player] spawn"
-```
-
-## Database
-
-GhastTasks uses SQLite to track task execution:
-- **File**: `plugins/GhastTasks/tasks.db`
-- **Table**: `executed_tasks`
-- **Purpose**: Ensures each task executes only once per day
-- **Schema**:
-  ```sql
-  CREATE TABLE executed_tasks (
-      task_id INTEGER NOT NULL,
-      execution_date DATE NOT NULL,
-      execution_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-      PRIMARY KEY (task_id, execution_date)
-  );
-  ```
-
-## Technical Details
-
-### Time Management
-- Uses PlaceholderAPI's `%servertime%` placeholder for server time
-- Falls back to system time if PlaceholderAPI is unavailable
-- Checks every 10 seconds to balance accuracy with performance
-- Prevents duplicate executions within the same minute
-- Supports multiple time formats: HH:mm, HHmm, HH:mm:ss, HHmmss
-
-### Spam Prevention & Performance
-- **Execution Locks**: Prevents concurrent execution of the same task
-- **Command Delays**: 50ms delay between commands to prevent spam
-- **Time Change Detection**: Only processes when time actually changes
-- **Database Optimization**: Indexed queries and connection pooling
-- **Thread Safety**: All operations are thread-safe with proper locking
-
-### Database Operations
-- **Asynchronous Operations**: Database operations run asynchronously to prevent server lag
-- **Connection Management**: Automatic connection handling with proper cleanup
-- **WAL Mode**: Write-Ahead Logging for better performance
-- **Foreign Key Constraints**: Data integrity enforcement
-- **Thread-Safe**: ReentrantLock prevents race conditions
-
-### Error Handling
-- **Comprehensive Logging**: Detailed logging for troubleshooting
-- **Graceful Degradation**: Safe handling of invalid configurations
-- **Input Validation**: Thorough validation of all user inputs
-- **Exception Safety**: Try-catch blocks around all critical operations
-- **User-Friendly Messages**: Clear error messages for administrators
-
-## Troubleshooting
+## 🐛 Troubleshooting
 
 ### Common Issues
 
-1. **Tasks not executing**
-   - Verify PlaceholderAPI is installed and working: `/papi version`
-   - Check server console for error messages
-   - Enable debug mode in config for detailed logging
-   - Ensure task times are in correct HH:MM format
+**Plugin doesn't load:**
+- Ensure PlaceholderAPI is installed and enabled
+- Check that you're using Java 17 or higher
+- Verify the plugin JAR is in the correct plugins folder
 
-2. **Permission errors**
-   - Ensure players have appropriate permissions
-   - Check permission plugin configuration
-   - Verify permission inheritance is working correctly
+**Tasks not executing:**
+- Check server console for error messages
+- Verify task time format is HH:MM (24-hour)
+- Ensure debug mode is enabled for detailed logging
+- Use `/ghasttasks testtime` to verify time synchronization
 
-3. **Database errors**
-   - Verify plugin has write permissions in its data folder
-   - Check for SQLite driver conflicts with other plugins
-   - Look for file system space issues
+**Placeholders not working:**
+- Confirm PlaceholderAPI is installed and running
+- Check that the placeholder syntax is correct
+- Verify the plugin registered successfully (check console on startup)
 
-4. **Command execution issues**
-   - Verify command syntax is correct
-   - Check if commands work when executed manually
-   - Ensure target players are online for `[player]` commands
+**Database errors:**
+- Ensure the plugin has write permissions to the plugins folder
+- Check available disk space
+- Review console logs for specific SQLite errors
 
 ### Debug Mode
 
-Enable debug mode in `config.yml`:
+Enable debug mode in `config.yml` for detailed logging:
+
 ```yaml
 debug: true
 ```
 
-This provides detailed logging for:
-- Task execution attempts and results
-- Database operations and queries
-- Time checking intervals and changes
-- Command execution details and outcomes
-- Error stack traces for troubleshooting
+This will provide extensive logging information including:
+- Task loading details
+- Command execution results
+- Database operations
+- Time checking processes
+- Placeholder resolution
 
-### Performance Monitoring
+## 📞 Support
 
-Monitor these aspects for optimal performance:
-- Server TPS during task execution
-- Database file size growth
-- Memory usage patterns
-- Console log frequency
+- **Wiki**: Check the [Wiki](https://github.com/Ninjaman0/GhastTask/wiki) for detailed guides
+- **Discord**: Join our [Discord Server](https://discord.gg/ghastlegion) for community support
 
-## Building from Source
-
-### Prerequisites
-- Java 21 or higher
-- Maven 3.6 or higher
-- Git
-
-### Build Steps
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
-   cd GhastTasks
-   ```
-
-2. Build the plugin:
-   ```bash
-   mvn clean package
-   ```
-
-3. Find the compiled JAR in the `target` folder:
-   ```
-   target/GhastTasks-1.0.0.jar
-   ```
-
-### Development Setup
-```bash
-# Clean build
-mvn clean
-
-# Compile only
-mvn compile
-
-# Run tests
-mvn test
-
-# Package without tests
-mvn package -DskipTests
-```
-
-## Configuration Best Practices
-
-### Task Design
-- **Keep commands simple**: Avoid overly complex command chains
-- **Test thoroughly**: Use `/gtasks test <id>` before deploying
-- **Monitor execution**: Enable debug mode initially to verify behavior
-- **Backup configs**: Keep backups of working configurations
-
-### Performance Optimization
-- **Limit concurrent tasks**: Avoid scheduling multiple tasks at the same time
-- **Command efficiency**: Use efficient commands that don't cause lag
-- **Database maintenance**: Periodically check database size
-- **Debug mode**: Disable debug mode in production for better performance
-
-### Security Considerations
-- **Permission management**: Carefully assign permissions
-- **Command validation**: Test all commands before deployment
-- **Input sanitization**: The plugin handles this automatically
-- **Backup strategy**: Regular backups of config and database
-
-## API for Developers
-
-### Events
-The plugin fires custom events that other plugins can listen to:
-- `TaskExecuteEvent`: Fired before task execution
-- `TaskCompleteEvent`: Fired after successful task execution
-
-### Integration
-Other plugins can interact with GhastTasks through:
-- Direct API calls to TaskManager
-- Database queries (read-only recommended)
-- Configuration file modifications
-
-## Support & Contributing
-
-### Getting Help
-- Check this documentation first
-- Enable debug mode for detailed logs
-- Search existing issues in the repository
-- Create detailed bug reports with logs
-
-### Contributing
-- Fork the repository
-- Create feature branches
-- Follow existing code style
-- Add tests for new features
-- Submit pull requests with clear descriptions
-
-## Changelog
-
-### Version 1.0.0
-- Initial release
-- Core task scheduling functionality
-- SQLite database integration
-- Full command suite implementation
-- Spam prevention and thread safety
-- Comprehensive error handling
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Credits
-
-- **PlaceholderAPI**: For server time integration
-- **Paper**: For the robust Minecraft server platform
-- **SQLite**: For lightweight database functionality
-
----
-
-**Note**: This plugin is designed for Paper servers. Bukkit/Spigot compatibility is not guaranteed due to the use of Paper-specific APIs and features.
+**Made with ❤️ by Ninja0_0 aka NotNinja0_0**
