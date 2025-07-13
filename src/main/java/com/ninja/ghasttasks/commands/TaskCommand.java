@@ -20,11 +20,11 @@ import java.util.stream.Collectors;
  */
 public class TaskCommand implements CommandExecutor, TabCompleter {
     private final GhastTasks plugin;
-    
+
     public TaskCommand(GhastTasks plugin) {
         this.plugin = plugin;
     }
-    
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.hasPermission("ghasttasks.use")) {
@@ -32,14 +32,14 @@ public class TaskCommand implements CommandExecutor, TabCompleter {
                     .color(NamedTextColor.RED));
             return true;
         }
-        
+
         if (args.length == 0) {
             sendHelp(sender);
             return true;
         }
-        
+
         String subCommand = args[0].toLowerCase();
-        
+
         switch (subCommand) {
             case "reload":
                 return handleReload(sender);
@@ -51,6 +51,8 @@ public class TaskCommand implements CommandExecutor, TabCompleter {
                 return handleTest(sender, args);
             case "remove":
                 return handleRemove(sender, args);
+            case "testtime":
+                return handleTestTime(sender);
             case "help":
                 sendHelp(sender);
                 return true;
@@ -61,55 +63,55 @@ public class TaskCommand implements CommandExecutor, TabCompleter {
                 return true;
         }
     }
-    
+
     private boolean handleReload(CommandSender sender) {
         if (!sender.hasPermission("ghasttasks.admin")) {
             sender.sendMessage(Component.text("You don't have permission to reload the configuration.")
                     .color(NamedTextColor.RED));
             return true;
         }
-        
+
         try {
             sender.sendMessage(Component.text("Reloading GhastTasks configuration...")
                     .color(NamedTextColor.YELLOW));
-            
+
             plugin.reloadPlugin();
-            
+
             sender.sendMessage(Component.text("GhastTasks config reloaded successfully!")
                     .color(NamedTextColor.GREEN));
-                    
+
         } catch (Exception e) {
             sender.sendMessage(Component.text("Failed to reload config: " + e.getMessage())
                     .color(NamedTextColor.RED));
             plugin.getLogger().severe("Error during reload: " + e.getMessage());
         }
-        
+
         return true;
     }
-    
+
     private boolean handleList(CommandSender sender) {
         if (!sender.hasPermission("ghasttasks.view")) {
             sender.sendMessage(Component.text("You don't have permission to view tasks.")
                     .color(NamedTextColor.RED));
             return true;
         }
-        
+
         Map<Integer, Task> tasks = plugin.getTaskManager().getAllTasks();
-        
+
         if (tasks.isEmpty()) {
             sender.sendMessage(Component.text("No tasks configured.")
                     .color(NamedTextColor.YELLOW));
             return true;
         }
-        
+
         sender.sendMessage(Component.text("=== GhastTasks List (" + tasks.size() + " tasks) ===")
                 .color(NamedTextColor.GOLD));
-        
+
         // Sort tasks by ID for consistent display
         List<Task> sortedTasks = tasks.values().stream()
                 .sorted((t1, t2) -> Integer.compare(t1.getId(), t2.getId()))
                 .collect(Collectors.toList());
-        
+
         for (Task task : sortedTasks) {
             sender.sendMessage(Component.text("Task ID: " + task.getId())
                     .color(NamedTextColor.AQUA));
@@ -117,7 +119,7 @@ public class TaskCommand implements CommandExecutor, TabCompleter {
                     .color(NamedTextColor.WHITE));
             sender.sendMessage(Component.text("Commands (" + task.getCommands().size() + "):")
                     .color(NamedTextColor.WHITE));
-            
+
             for (int i = 0; i < task.getCommands().size(); i++) {
                 String command = task.getCommands().get(i);
                 // Truncate very long commands for display
@@ -127,37 +129,37 @@ public class TaskCommand implements CommandExecutor, TabCompleter {
                 sender.sendMessage(Component.text("  " + (i + 1) + ". " + command)
                         .color(NamedTextColor.GRAY));
             }
-            
+
             sender.sendMessage(Component.text(""));
         }
-        
+
         return true;
     }
-    
+
     private boolean handleEdit(CommandSender sender, String[] args) {
         if (!sender.hasPermission("ghasttasks.admin")) {
             sender.sendMessage(Component.text("You don't have permission to edit tasks.")
                     .color(NamedTextColor.RED));
             return true;
         }
-        
+
         if (args.length < 4) {
             sender.sendMessage(Component.text("Usage: /ghasttasks edit <task_id> <time|commands> <value>")
                     .color(NamedTextColor.RED));
             return true;
         }
-        
+
         try {
             int taskId = Integer.parseInt(args[1]);
             String editType = args[2].toLowerCase();
-            
+
             Task task = plugin.getTaskManager().getTask(taskId);
             if (task == null) {
                 sender.sendMessage(Component.text("Task ID " + taskId + " not found.")
                         .color(NamedTextColor.RED));
                 return true;
             }
-            
+
             switch (editType) {
                 case "time":
                     if (args.length < 4) {
@@ -165,7 +167,7 @@ public class TaskCommand implements CommandExecutor, TabCompleter {
                                 .color(NamedTextColor.RED));
                         return true;
                     }
-                    
+
                     String newTime = args[3];
                     if (plugin.getTaskManager().updateTaskTime(taskId, newTime)) {
                         sender.sendMessage(Component.text("Task " + taskId + " time updated to " + newTime)
@@ -175,14 +177,14 @@ public class TaskCommand implements CommandExecutor, TabCompleter {
                                 .color(NamedTextColor.RED));
                     }
                     break;
-                    
+
                 case "commands":
                     if (args.length < 5) {
                         sender.sendMessage(Component.text("Usage: /ghasttasks edit <task_id> commands <add|remove> <command|index>")
                                 .color(NamedTextColor.RED));
                         return true;
                     }
-                    
+
                     String commandAction = args[3].toLowerCase();
                     if ("add".equals(commandAction)) {
                         // Join all remaining args as the command
@@ -192,7 +194,7 @@ public class TaskCommand implements CommandExecutor, TabCompleter {
                                     .color(NamedTextColor.RED));
                             return true;
                         }
-                        
+
                         if (plugin.getTaskManager().addCommandToTask(taskId, newCommand)) {
                             sender.sendMessage(Component.text("Command added to task " + taskId + ": " + newCommand)
                                     .color(NamedTextColor.GREEN));
@@ -208,7 +210,7 @@ public class TaskCommand implements CommandExecutor, TabCompleter {
                                         .color(NamedTextColor.RED));
                                 return true;
                             }
-                            
+
                             if (plugin.getTaskManager().removeCommandFromTask(taskId, commandIndex)) {
                                 sender.sendMessage(Component.text("Command " + commandIndex + " removed from task " + taskId)
                                         .color(NamedTextColor.GREEN));
@@ -225,83 +227,83 @@ public class TaskCommand implements CommandExecutor, TabCompleter {
                                 .color(NamedTextColor.RED));
                     }
                     break;
-                    
+
                 default:
                     sender.sendMessage(Component.text("Invalid edit type. Use 'time' or 'commands'.")
                             .color(NamedTextColor.RED));
                     break;
             }
-            
+
         } catch (NumberFormatException e) {
             sender.sendMessage(Component.text("Invalid task ID. Must be a number.")
                     .color(NamedTextColor.RED));
         }
-        
+
         return true;
     }
-    
+
     private boolean handleTest(CommandSender sender, String[] args) {
         if (!sender.hasPermission("ghasttasks.admin")) {
             sender.sendMessage(Component.text("You don't have permission to test tasks.")
                     .color(NamedTextColor.RED));
             return true;
         }
-        
+
         if (args.length < 2) {
             sender.sendMessage(Component.text("Usage: /ghasttasks test <task_id>")
                     .color(NamedTextColor.RED));
             return true;
         }
-        
+
         try {
             int taskId = Integer.parseInt(args[1]);
             Task task = plugin.getTaskManager().getTask(taskId);
-            
+
             if (task == null) {
                 sender.sendMessage(Component.text("Task ID " + taskId + " not found.")
                         .color(NamedTextColor.RED));
                 return true;
             }
-            
+
             sender.sendMessage(Component.text("Testing task " + taskId + " (" + task.getCommands().size() + " commands)...")
                     .color(NamedTextColor.YELLOW));
-            
+
             plugin.getTaskManager().executeTaskForTesting(taskId);
-            
+
             sender.sendMessage(Component.text("Task " + taskId + " executed for testing. Check console for execution details.")
                     .color(NamedTextColor.GREEN));
-            
+
         } catch (NumberFormatException e) {
             sender.sendMessage(Component.text("Invalid task ID. Must be a number.")
                     .color(NamedTextColor.RED));
         }
-        
+
         return true;
     }
-    
+
     private boolean handleRemove(CommandSender sender, String[] args) {
         if (!sender.hasPermission("ghasttasks.admin")) {
             sender.sendMessage(Component.text("You don't have permission to remove tasks.")
                     .color(NamedTextColor.RED));
             return true;
         }
-        
+
         if (args.length < 2) {
             sender.sendMessage(Component.text("Usage: /ghasttasks remove <task_id>")
                     .color(NamedTextColor.RED));
             return true;
         }
-        
+
         try {
             int taskId = Integer.parseInt(args[1]);
-            
+
             Task task = plugin.getTaskManager().getTask(taskId);
             if (task == null) {
                 sender.sendMessage(Component.text("Task ID " + taskId + " not found.")
                         .color(NamedTextColor.RED));
                 return true;
             }
-            
+
             if (plugin.getTaskManager().removeTask(taskId)) {
                 sender.sendMessage(Component.text("Task " + taskId + " removed successfully.")
                         .color(NamedTextColor.GREEN));
@@ -309,15 +311,33 @@ public class TaskCommand implements CommandExecutor, TabCompleter {
                 sender.sendMessage(Component.text("Failed to remove task " + taskId + ".")
                         .color(NamedTextColor.RED));
             }
-            
+
         } catch (NumberFormatException e) {
             sender.sendMessage(Component.text("Invalid task ID. Must be a number.")
                     .color(NamedTextColor.RED));
         }
-        
+
         return true;
     }
-    
+
+    private boolean handleTestTime(CommandSender sender) {
+        if (!sender.hasPermission("ghasttasks.admin")) {
+            sender.sendMessage(Component.text("You don't have permission to test time placeholders.")
+                    .color(NamedTextColor.RED));
+            return true;
+        }
+
+        sender.sendMessage(Component.text("Testing system time and database...")
+                .color(NamedTextColor.YELLOW));
+
+        plugin.getTimeManager().testTime();
+
+        sender.sendMessage(Component.text("Time and database test completed. Check console for details.")
+                .color(NamedTextColor.GREEN));
+
+        return true;
+    }
+
     private void sendHelp(CommandSender sender) {
         sender.sendMessage(Component.text("=== GhastTasks Commands ===")
                 .color(NamedTextColor.GOLD));
@@ -335,28 +355,31 @@ public class TaskCommand implements CommandExecutor, TabCompleter {
                 .color(NamedTextColor.WHITE));
         sender.sendMessage(Component.text("/ghasttasks remove <id> - Remove task")
                 .color(NamedTextColor.WHITE));
+        sender.sendMessage(Component.text("/ghasttasks testtime - Test system time and database")
+                .color(NamedTextColor.WHITE));
         sender.sendMessage(Component.text("/ghasttasks help - Show this help")
                 .color(NamedTextColor.WHITE));
     }
-    
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> completions = new ArrayList<>();
-        
+
         if (!sender.hasPermission("ghasttasks.use")) {
             return completions;
         }
-        
+
         if (args.length == 1) {
-            List<String> subCommands = Arrays.asList("reload", "list", "edit", "test", "remove", "help");
+            List<String> subCommands = Arrays.asList("reload", "list", "edit", "test", "remove", "testtime", "help");
             String input = args[0].toLowerCase();
             for (String subCommand : subCommands) {
                 if (subCommand.startsWith(input)) {
                     completions.add(subCommand);
                 }
             }
-        } else if (args.length == 2 && !args[0].equalsIgnoreCase("reload") && 
-                   !args[0].equalsIgnoreCase("list") && !args[0].equalsIgnoreCase("help")) {
+        } else if (args.length == 2 && !args[0].equalsIgnoreCase("reload") &&
+                !args[0].equalsIgnoreCase("list") && !args[0].equalsIgnoreCase("help") &&
+                !args[0].equalsIgnoreCase("testtime")) {
             // Task ID completion
             String input = args[1];
             for (Integer taskId : plugin.getTaskManager().getAllTasks().keySet()) {
@@ -382,7 +405,7 @@ public class TaskCommand implements CommandExecutor, TabCompleter {
                 completions.add("remove");
             }
         }
-        
+
         return completions;
     }
 }
